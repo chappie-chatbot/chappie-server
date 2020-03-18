@@ -1,0 +1,6 @@
+spring:
+  kafka:
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+kafka:
+  bootstrapAddress: k1.local:9092,k2.local:9092,k3.local:9092
