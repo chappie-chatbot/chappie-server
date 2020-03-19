@@ -9,13 +9,10 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.TopicPartition;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.listener.ConsumerSeekAware;
 import org.springframework.kafka.support.SendResult;
 import org.springframework.stereotype.Repository;
-import org.springframework.util.CollectionUtils;
 import org.springframework.util.concurrent.ListenableFuture;
 
 import java.time.Duration;
@@ -24,10 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -107,7 +101,7 @@ public class KafkaMessagingProvider implements MessagingProvider {
     }
 
     private int poll(Consumer<? super String, ? super Message> consumer, List<Message> results) {
-        ConsumerRecords<? super String, ? super Message> records = consumer.poll(TIMEOUT.dividedBy(10));
+        ConsumerRecords<? super String, ? super Message> records = consumer.poll(Duration.ofMillis(100));
         for (ConsumerRecord<? super String, ? super Message> record : records) {
             Message msg = (Message) record.value();
             msg.setId(new MessageId(record.topic(),record.offset()));
@@ -115,31 +109,5 @@ public class KafkaMessagingProvider implements MessagingProvider {
         }
         consumer.commitAsync();
         return records.count();
-    }
-
-    public class MyListener implements ConsumerSeekAware {
-        List<Message> messages = new LinkedList<>();
-        boolean done = false;
-
-        @KafkaListener(topics = "${kafka.topic}", containerFactory = "kafkaListenerContainerFactoryListener")
-        public void receiveMessage(final Message message) {
-            messages.add(message);
-        }
-
-        @Override
-        public void registerSeekCallback(final ConsumerSeekCallback consumerSeekCallback) {}
-
-        @Override
-        public void onPartitionsAssigned(final Map<TopicPartition, Long> assignments, final ConsumerSeekCallback consumerSeekCallback) {
-            try(Consumer<? super String, ? super Message> consumer = kafkaListenerContainerFactory.getConsumerFactory().createConsumer()) {
-                final Map<TopicPartition, Long> topicPartitionLongMap = consumer.endOffsets(assignments.keySet());
-                assignments.forEach((topic, action) -> consumerSeekCallback.seekToBeginning(consumer.assignment()));
-            }
-        }
-
-        @Override
-        public void onIdleContainer(final Map<TopicPartition, Long> map, final ConsumerSeekCallback consumerSeekCallback) {
-            done=true;
-        }
     }
 }
