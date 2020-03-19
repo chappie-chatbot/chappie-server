@@ -2,7 +2,6 @@ package com.chg.hackdays.chappie.server.controller;
 
 import com.chg.hackdays.chappie.function.ConsumerThrowsException;
 import com.chg.hackdays.chappie.function.ProducerThrowsException;
-import com.chg.hackdays.chappie.model.HasContentType;
 import com.chg.hackdays.chappie.model.Response;
 import com.chg.hackdays.chappie.model.ResponseStatus;
 import org.modelmapper.ModelMapper;
@@ -16,7 +15,6 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 public class BaseController {
     protected final Logger log = LoggerFactory.getLogger(getClass());
@@ -55,9 +53,6 @@ public class BaseController {
 
     private <T>ResponseEntity<T> ok(T body){
         ResponseEntity<T> responseEntity = ResponseEntity.ok(body);
-        if(body instanceof HasContentType){
-            responseEntity.getHeaders().set("Content-Type", ((HasContentType) body).getContentType());
-        }
         return responseEntity;
     }
 

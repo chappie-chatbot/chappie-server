@@ -1,6 +1,5 @@
 package com.chg.hackdays.chappie.server.controller;
 
-import com.chg.hackdays.chappie.model.DocumentResponse;
 import com.chg.hackdays.chappie.model.ListRequest;
 import com.chg.hackdays.chappie.model.ListResponse;
 import com.chg.hackdays.chappie.model.Message;
@@ -8,7 +7,6 @@ import com.chg.hackdays.chappie.model.MessageId;
 import com.chg.hackdays.chappie.server.service.MessageService;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.websocket.server.PathParam;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
