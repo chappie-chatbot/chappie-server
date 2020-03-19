@@ -1,6 +1,16 @@
+# I think everything in spring is being ignored
 spring:
   kafka:
     producer:
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+  json:
+    value:
+      default:
+        type: com.chg.hackdays.chappie.model.Message
+    use:
+      type:
+        headers: false
 kafka:
   bootstrapAddress: k1.local:9092,k2.local:9092,k3.local:9092
+  groupId: chappie
+  defaultTopic: chat

@@ -10,6 +10,8 @@ import java.util.List;
 
 @Service
 public class MessageServiceImpl implements MessageService {
+    private static final int DEFAULT_MESSAGE_COUNT = 1000;
+
     @Autowired
     MessagingProvider messagingProvider;
 
@@ -22,7 +24,22 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<Message> getMessages() {
-        throw new UnsupportedOperationException("TODO: Get messages");
+        return getMessages(null);
+    }
+
+    @Override
+    public List<Message> getMessages(String topic) {
+        return getMessages(topic,0);
+    }
+
+    @Override
+    public List<Message> getMessages(String topic,int first) {
+        return getMessages(topic,first,DEFAULT_MESSAGE_COUNT);
+    }
+
+    @Override
+    public List<Message> getMessages(String topic, int first, int count) {
+        return messagingProvider.get(topic,first,count);
     }
 
     private void postMessage(Message message) {
