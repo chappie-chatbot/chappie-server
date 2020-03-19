@@ -7,5 +7,5 @@ import java.util.List;
 public interface MessagingProvider {
     void post(Message msg);
 
-    List<Message> get(String topic, int first, int count);
+    List<Message> get(String topic, long first, int count);
 }
