@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Repository
@@ -50,10 +52,25 @@ public class RasaChatbotProvider implements ChatbotProvider {
 
     private Message mapRasaResponse(Message request, RasaResponse response) {
         Message result = new Message();
+
+        StringBuilder textBuilder = new StringBuilder();
+        Pattern attrPattern = Pattern.compile("\\[[^\\]]*\\]");
+        Matcher attrMatcher = attrPattern.matcher(response.getText());
+        int nextCh = 0;
+        while(attrMatcher.find()){
+            String group = attrMatcher.group();
+            String attrFullStr = group.substring(1, group.length()-1);
+            String[] attrParts = attrFullStr.split(":",2);
+            result.getAttributes().put(attrParts[0],attrParts[1]);
+            textBuilder.append(response.getText().substring(nextCh,attrMatcher.start()));
+            nextCh = attrMatcher.end();
+        }
+        textBuilder.append(response.getText().substring(nextCh));
+
         result.setTopic(MESSAGE_TOPIC);
         result.setSource(messageSource);
         result.setTarget(request.getSource());
-        result.setText(response.text);
+        result.setText(textBuilder.toString().trim());
         result.setReplyTo(request.getId());
         result.setType("text");
         result.setConversation(request.getConversation());
