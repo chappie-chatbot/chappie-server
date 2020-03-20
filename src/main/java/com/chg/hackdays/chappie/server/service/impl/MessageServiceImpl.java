@@ -65,7 +65,8 @@ public class MessageServiceImpl implements MessageService {
             message.setType("text");
         if(message.getMime()==null)
             message.setMime("text/plain");
-        message.setSource(sessionService.getUsername());
+        if(message.getSource()==null)
+            message.setSource(sessionService.getUsername());
         message.setTimestamp(ZonedDateTime.now());
     }
 }
