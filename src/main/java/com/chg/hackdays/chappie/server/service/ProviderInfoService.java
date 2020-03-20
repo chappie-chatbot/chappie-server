@@ -21,13 +21,9 @@ public class ProviderInfoService {
 
   public String getProviderInfo(String providerNumber) {
 
-    UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(providerInfoUrl);
-
-    HttpHeaders httpHeaders = new HttpHeaders();
-    httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
-    HttpEntity<String> requestEntity = new HttpEntity<>(providerNumber, httpHeaders);
-
+    UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(providerInfoUrl)
+        .queryParam("providerNumber", providerNumber);
+    HttpEntity<String> requestEntity = new HttpEntity<>(new HttpHeaders());
     ResponseEntity<String> responseEntity = new RestTemplate()
         .exchange(uriBuilder.toUriString(), HttpMethod.GET, requestEntity, String.class);
 
