@@ -32,9 +32,11 @@ public class MessageController extends BaseController {
     MessageService messageService;
 
     @GetMapping("/message")
-    public ResponseEntity<ListResponse> getMessages(@RequestParam("topic")String topic) {
+    public ResponseEntity<ListResponse> getMessages(
+            @RequestParam("topic") String topic,
+            @RequestParam(name = "start", required = false) int start) {
         return respond(new ListResponse(), resp -> {
-            resp.getItems().addAll(messageService.getMessages(topic));
+            resp.getItems().addAll(messageService.getMessages(topic, start));
         });
     }
 
