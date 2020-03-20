@@ -20,3 +20,7 @@ chatbot:
     url:
       base: ${RASA_HOST:http://chappie-bot:5005}
       webhook: /webhooks/rest/webhook
+timeentry:
+  url:
+    base: ${TIMEENTRY_HOST:http://localhost:8089}
+    providerInfo: /getProviderInfo
