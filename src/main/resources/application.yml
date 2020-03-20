@@ -14,3 +14,9 @@ kafka:
   bootstrapAddress: k1.local:9092,k2.local:9092,k3.local:9092
   groupId: chappie
   defaultTopic: chat
+chatbot:
+  id: test
+  rasa:
+    url:
+      base: ${RASA_HOST:http://localhost:5005}
+      webhook: /webhooks/rest/webhook
