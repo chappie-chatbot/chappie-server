@@ -18,5 +18,5 @@ chatbot:
   id: test
   rasa:
     url:
-      base: ${RASA_HOST:http://localhost:5005}
+      base: ${RASA_HOST:http://chappie-bot:5005}
       webhook: /webhooks/rest/webhook
