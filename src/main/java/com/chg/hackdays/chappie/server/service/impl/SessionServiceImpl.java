@@ -6,8 +6,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class SessionServiceImpl implements SessionService {
     @Override
-    public int getCurrentConversationId() {
-        return 1;
+    public Long getCurrentConversationId() {
+        return 1L;
     }
 
     @Override

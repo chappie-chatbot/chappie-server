@@ -6,6 +6,7 @@ import com.chg.hackdays.chappie.server.service.MessageService;
 import com.chg.hackdays.chappie.server.service.MessagingProvider;
 import com.chg.hackdays.chappie.server.service.SessionService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
@@ -16,7 +17,7 @@ public class MessageServiceImpl implements MessageService {
     private static final int DEFAULT_MESSAGE_COUNT = 1000;
 
     @Autowired
-    MessagingProvider messagingProvider;
+    DBMessagingProvider messagingProvider;
     @Autowired
     SessionService sessionService;
 

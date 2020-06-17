@@ -18,9 +18,14 @@ chatbot:
   id: test
   rasa:
     url:
-      base: ${RASA_HOST:http://chappie-bot:5005}
+      base: ${RASA_HOST:http://localhost:5005}
       webhook: /webhooks/rest/webhook
 timeentry:
   url:
     base: ${TIMEENTRY_HOST:http://localhost:8089}
     providerInfo: /getProviderInfo
+chappie:
+  db:
+    url:
+      base: ${DB_ADAPTER_HOST:http://localhost:8081}
+      message: /message

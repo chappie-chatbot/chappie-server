@@ -4,8 +4,8 @@ import com.chg.hackdays.chappie.model.ListRequest;
 import com.chg.hackdays.chappie.model.ListResponse;
 import com.chg.hackdays.chappie.model.Message;
 import com.chg.hackdays.chappie.model.MessageId;
-import com.chg.hackdays.chappie.server.service.ChatbotService;
 import com.chg.hackdays.chappie.server.service.MessageService;
+import com.chg.hackdays.chappie.util.EncodeUtil;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
-import java.util.concurrent.Exchanger;
 import java.util.stream.Collectors;
 
 @RestController
@@ -36,7 +34,7 @@ public class MessageController extends BaseController {
             @RequestParam("topic") String topic,
             @RequestParam(name = "start", required = false) Long start) {
         return respond(new ListResponse(), resp -> {
-            resp.getItems().addAll(messageService.getMessages(topic, start==null ? 0L : start));
+            resp.getItems().addAll(messageService.getMessages(topic, start == null ? 0L : start));
         });
     }
 
@@ -44,7 +42,7 @@ public class MessageController extends BaseController {
     public ResponseEntity<ListResponse> getMessagesById(@PathVariable("ids") String idsStr) {
         return respond(new ListResponse(), resp -> {
             List<String> ids = Arrays.asList(idsStr.split("[,;\\s]+")).stream().collect(Collectors.toList());
-            if(ids.size() > 1)
+            if (ids.size() > 1)
                 throw new UnsupportedOperationException("TODO: Support multiple IDs");
             resp.getItems().add(messageService.getMessage(new MessageId(ids.iterator().next())));
         });
@@ -55,19 +53,10 @@ public class MessageController extends BaseController {
         Message message = messageService.getMessage(new MessageId(idStr));
         response.setContentType(message.getMime());
         String type = message.getType();
-        if(type==null)
-            type= "text";
-        try(OutputStream os = response.getOutputStream()){
-            switch (type.toLowerCase()) {
-                case "base64":
-                    os.write(Base64.getDecoder().decode(message.getText()));
-                    break;
-                case "text":
-                    os.write(message.getText().getBytes());
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unsupported message type: "+type);
-            }
+        if (type == null)
+            type = "text";
+        try (OutputStream os = response.getOutputStream()) {
+            os.write(EncodeUtil.decode(type, message.getText()));
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -76,7 +65,8 @@ public class MessageController extends BaseController {
     @PostMapping("/message")
     public ResponseEntity<ListResponse> postMessages(@RequestBody ListRequest<Message> req) {
         return respond(new ListResponse(), resp -> {
-            List<Message> messages = modelMapper.map(req.getItems(), new TypeToken<List<Message>>() {}.getType());
+            List<Message> messages = modelMapper.map(req.getItems(), new TypeToken<List<Message>>() {
+            }.getType());
             messageService.postMessages(messages);
             resp.getItems().addAll(messages);
         });
