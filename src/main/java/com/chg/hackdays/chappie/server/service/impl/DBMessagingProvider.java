@@ -1,15 +1,13 @@
 package com.chg.hackdays.chappie.server.service.impl;
 
+import com.chg.hackdays.chappie.model.Conversation;
 import com.chg.hackdays.chappie.model.ListResponse;
 import com.chg.hackdays.chappie.model.Message;
 import com.chg.hackdays.chappie.server.service.MessagingProvider;
-import com.chg.hackdays.chappie.util.DateUtil;
-import com.chg.hackdays.chappie.util.StringUtil;
-import org.modelmapper.Converter;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -20,10 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.time.ZonedDateTime;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 @Repository
 public class DBMessagingProvider implements MessagingProvider {
@@ -34,6 +29,8 @@ public class DBMessagingProvider implements MessagingProvider {
 
     @Value("${chappie.db.url.base}/${chappie.db.url.message}")
     String messageUrl;
+    @Value("${chappie.db.url.base}/${chappie.db.url.conversation}")
+    String conversationUrl;
 
     @Override
     public void post(Message msg) {
@@ -49,27 +46,23 @@ public class DBMessagingProvider implements MessagingProvider {
                 .queryParam("topic", topic)
                 .queryParam("start", first)
                 .queryParam("count", count);
-        ResponseEntity<ListResponse> response = restTemplate.exchange(uriBuilder.toUriString(), HttpMethod.GET, requestEntity, ListResponse.class);
-        return mapMessages(response.getBody().getItems());
+        ResponseEntity<ListResponse<Message>> response = restTemplate.exchange(uriBuilder.toUriString(), HttpMethod.GET, requestEntity, new ParameterizedTypeReference<ListResponse<Message>>() {
+        });
+        return response.getBody().getItems();
     }
 
-    private List<Message> mapMessages(List items) {
-        List<Message> result = new LinkedList<>();
-        for (Object item : items) {
-            result.add(mapMessage((Map<?,?>)item));
-        }
-        return result;
-    }
-
-    private Message mapMessage(Map<?, ?> map) {
-        Message message = modelMapper.map(map,Message.class);
-
-        // TODO: Fix ModelMapper so the following mappings are not required
-
-        message.setId(StringUtil.toString(map.get("id")));
-        message.setTimestamp(ZonedDateTime.parse(StringUtil.toString(map.get("timestamp")), DateUtil.FORMAT));
-        message.addAttributes((Map<String,String>) map.get("attributes"));
-
-        return message;
+    @Override
+    public List<Conversation> getConversations(Long id, String participant) {
+        RestTemplate restTemplate = new RestTemplate();
+        MultiValueMap<String, String> headers = new HttpHeaders();
+        HttpEntity<RasaChatbotProvider.RasaRequest> requestEntity = new HttpEntity<>(headers);
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance().uri(URI.create(conversationUrl));
+        if (id != null)
+            uriBuilder.queryParam("id", id);
+        if (participant != null)
+            uriBuilder.queryParam("participant", participant);
+        ResponseEntity<ListResponse<Conversation>> response = restTemplate.exchange(uriBuilder.toUriString(), HttpMethod.GET, requestEntity, new ParameterizedTypeReference<ListResponse<Conversation>>() {
+        });
+        return response.getBody().getItems();
     }
 }

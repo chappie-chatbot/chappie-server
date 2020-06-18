@@ -29,3 +29,4 @@ chappie:
     url:
       base: ${DB_ADAPTER_HOST:http://localhost:8081}
       message: /message
+      conversation: /conversation

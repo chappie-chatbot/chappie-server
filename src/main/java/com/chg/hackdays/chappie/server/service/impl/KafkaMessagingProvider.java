@@ -1,5 +1,6 @@
 package com.chg.hackdays.chappie.server.service.impl;
 
+import com.chg.hackdays.chappie.model.Conversation;
 import com.chg.hackdays.chappie.model.Message;
 import com.chg.hackdays.chappie.model.MessageId;
 import com.chg.hackdays.chappie.server.service.MessagingProvider;
@@ -98,6 +99,11 @@ public class KafkaMessagingProvider implements MessagingProvider {
             // Ensure the results are in the correct order
             return results.stream().sorted(Comparator.comparing(msg->new MessageId(msg.getId()))).collect(Collectors.toList());
         }
+    }
+
+    @Override
+    public List<Conversation> getConversations(Long id, String participant) {
+        return Collections.EMPTY_LIST;
     }
 
     private int poll(Consumer<? super String, ? super Message> consumer, List<Message> results) {
