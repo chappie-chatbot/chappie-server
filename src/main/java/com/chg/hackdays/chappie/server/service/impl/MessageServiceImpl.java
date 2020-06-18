@@ -60,7 +60,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     private void initializeMessage(Message message) {
-        if(message.getConversation()<=0)
+        if(message.getConversation() == null || message.getConversation() <= 0)
             message.setConversation(sessionService.getCurrentConversationId());
         if(message.getType() == null)
             message.setType("text");

@@ -44,21 +44,28 @@ public class MessageController extends BaseController {
             List<String> ids = Arrays.asList(idsStr.split("[,;\\s]+")).stream().collect(Collectors.toList());
             if (ids.size() > 1)
                 throw new UnsupportedOperationException("TODO: Support multiple IDs");
-            resp.getItems().add(messageService.getMessage(new MessageId(ids.iterator().next())));
+            Message message = messageService.getMessage(new MessageId(ids.iterator().next()));
+            if (message != null) {
+                resp.getItems().add(message);
+            }
         });
     }
 
     @GetMapping("/message/{id}/content")
     public void getMessageContent(HttpServletResponse response, @PathVariable("id") String idStr) {
         Message message = messageService.getMessage(new MessageId(idStr));
-        response.setContentType(message.getMime());
-        String type = message.getType();
-        if (type == null)
-            type = "text";
-        try (OutputStream os = response.getOutputStream()) {
-            os.write(EncodeUtil.decode(type, message.getText()));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
+        if (message != null) {
+            response.setContentType(message.getMime());
+            String type = message.getType();
+            if (type == null)
+                type = "text";
+            try (OutputStream os = response.getOutputStream()) {
+                os.write(EncodeUtil.decode(type, message.getText()));
+            } catch (IOException e) {
+                throw new UncheckedIOException(e);
+            }
+        } else {
+            response.setStatus(404);
         }
     }
 
