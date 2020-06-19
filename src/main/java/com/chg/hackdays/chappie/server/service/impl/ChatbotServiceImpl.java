@@ -6,12 +6,10 @@ import com.chg.hackdays.chappie.server.service.ChatbotProvider;
 import com.chg.hackdays.chappie.server.service.ChatbotService;
 import com.chg.hackdays.chappie.server.service.MessageService;
 import com.chg.hackdays.chappie.util.StringUtil;
-import org.apache.kafka.common.record.Record;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.stereotype.Service;
@@ -56,7 +54,7 @@ public class ChatbotServiceImpl implements ChatbotService {
             if (!isFromChatBot && isToChatBot && !skip) {
                 processMessages(Collections.singleton(message));
             }
-        }catch(Exception e){
+        } catch (Exception e) {
             log.error("Failed to process chat message", e);
         }
     }
@@ -64,7 +62,7 @@ public class ChatbotServiceImpl implements ChatbotService {
     private List<Message> processMessages(Collection<Message> messages) {
         List<Message> replies = chatbotProvider.exchange(messages);
         for (Message reply : replies) {
-            if(reply.getSource()==null){
+            if (reply.getSource() == null) {
                 reply.setSource(USER_CHAPPIE);
             }
         }

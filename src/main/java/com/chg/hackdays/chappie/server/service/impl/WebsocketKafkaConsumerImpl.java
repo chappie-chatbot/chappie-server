@@ -14,14 +14,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class WebsocketKafkaConsumerImpl {
     private static final String TOPIC_CHAT = "chat";
-    private static final String KAFKA_GROUP_ID = "chappie-websocket";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
     @Autowired
     SimpMessagingTemplate simpMessagingTemplate;
 
-    @KafkaListener(topics = TOPIC_CHAT, groupId = KAFKA_GROUP_ID)
+    @KafkaListener(topics = TOPIC_CHAT)
     public void listen(GenericMessage<Message> genericMessage, @Payload Message message) {
         try {
             message.setId(new MessageId(message.getTopic(), (Long) genericMessage.getHeaders().get("kafka_offset")));
