@@ -37,6 +37,7 @@ timeentry:
     base: ${TIMEENTRY_HOST:http://localhost:8089}
     providerInfo: /getProviderInfo
 chappie:
+  server-id: ${CHAPPIE_SERVER_ID:server}
   db:
     url:
       base: ${DB_ADAPTER_HOST:http://localhost:8081}

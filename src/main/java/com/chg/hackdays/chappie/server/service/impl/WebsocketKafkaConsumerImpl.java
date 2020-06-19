@@ -20,7 +20,7 @@ public class WebsocketKafkaConsumerImpl {
     @Autowired
     SimpMessagingTemplate simpMessagingTemplate;
 
-    @KafkaListener(topics = TOPIC_CHAT)
+    @KafkaListener(topics = TOPIC_CHAT, groupId = "chappie-${chappie.server-id}")
     public void listen(GenericMessage<Message> genericMessage, @Payload Message message) {
         try {
             message.setId(new MessageId(message.getTopic(), (Long) genericMessage.getHeaders().get("kafka_offset")));
