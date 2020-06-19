@@ -9,6 +9,8 @@ import com.chg.hackdays.chappie.util.EncodeUtil;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,9 +34,14 @@ public class MessageController extends BaseController {
     @GetMapping("/message")
     public ResponseEntity<ListResponse> getMessages(
             @RequestParam("topic") String topic,
+            @RequestParam(name = "conversation", required = false) Long conversationId,
             @RequestParam(name = "start", required = false) Long start) {
         return respond(new ListResponse(), resp -> {
-            resp.getItems().addAll(messageService.getMessages(topic, start == null ? 0L : start));
+            if (conversationId != null) {
+                resp.getItems().addAll(messageService.getMessagesByConversation(topic, conversationId, start == null ? 0L : start));
+            } else {
+                resp.getItems().addAll(messageService.getMessages(topic, start == null ? 0L : start));
+            }
         });
     }
 
@@ -77,5 +84,11 @@ public class MessageController extends BaseController {
             messageService.postMessages(messages);
             resp.getItems().addAll(messages);
         });
+    }
+
+    @MessageMapping("/messages")
+    @SendTo("/topic/messages")
+    public void messageStream(Message message) throws Exception {
+        messageService.postMessage(message);
     }
 }

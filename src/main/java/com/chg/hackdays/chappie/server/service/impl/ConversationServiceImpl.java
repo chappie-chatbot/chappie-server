@@ -17,4 +17,9 @@ public class ConversationServiceImpl implements ConversationService {
     public List<Conversation> getConversations(Long id, String participant) {
         return messagingProvider.getConversations(id, participant);
     }
+
+    @Override
+    public Conversation createConversation() {
+        return messagingProvider.createConversation();
+    }
 }

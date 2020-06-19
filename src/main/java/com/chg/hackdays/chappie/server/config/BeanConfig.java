@@ -9,6 +9,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -16,9 +17,15 @@ import java.util.Map;
 @Configuration
 public class BeanConfig {
     private final ModelMapper controllerModelMapper = new ModelMapper();
+    private final RestTemplate restTemplate = new RestTemplate();
 
     @Bean
     public ModelMapper controllerModelMapper(){
         return controllerModelMapper;
+    }
+
+    @Bean
+    public RestTemplate restTemplate(){
+        return restTemplate;
     }
 }

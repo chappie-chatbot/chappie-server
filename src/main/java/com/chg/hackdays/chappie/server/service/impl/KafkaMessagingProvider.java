@@ -102,8 +102,17 @@ public class KafkaMessagingProvider implements MessagingProvider {
     }
 
     @Override
+    public List<Message> getByConversation(String topic, long conversationId, long first, int count) {
+        return get(topic, first, count).stream().filter(m -> m.getConversation().longValue() == conversationId).collect(Collectors.toList());
+    }
+    @Override
     public List<Conversation> getConversations(Long id, String participant) {
         return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public Conversation createConversation() {
+        return new Conversation(1);
     }
 
     private int poll(Consumer<? super String, ? super Message> consumer, List<Message> results) {

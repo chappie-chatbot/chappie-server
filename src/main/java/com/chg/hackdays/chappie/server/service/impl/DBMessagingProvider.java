@@ -1,6 +1,7 @@
 package com.chg.hackdays.chappie.server.service.impl;
 
 import com.chg.hackdays.chappie.model.Conversation;
+import com.chg.hackdays.chappie.model.ItemResponse;
 import com.chg.hackdays.chappie.model.ListResponse;
 import com.chg.hackdays.chappie.model.Message;
 import com.chg.hackdays.chappie.server.service.MessagingProvider;
@@ -26,6 +27,8 @@ public class DBMessagingProvider implements MessagingProvider {
     KafkaMessagingProvider kafkaMessagingProvider;
     @Autowired
     ModelMapper modelMapper;
+    @Autowired
+    RestTemplate restTemplate;
 
     @Value("${chappie.db.url.base}/${chappie.db.url.message}")
     String messageUrl;
@@ -39,7 +42,6 @@ public class DBMessagingProvider implements MessagingProvider {
 
     @Override
     public List<Message> get(String topic, long first, int count) {
-        RestTemplate restTemplate = new RestTemplate();
         MultiValueMap<String, String> headers = new HttpHeaders();
         HttpEntity<RasaChatbotProvider.RasaRequest> requestEntity = new HttpEntity<>(headers);
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance().uri(URI.create(messageUrl))
@@ -52,8 +54,21 @@ public class DBMessagingProvider implements MessagingProvider {
     }
 
     @Override
+    public List<Message> getByConversation(String topic, long conversationId, long first, int count) {
+        MultiValueMap<String, String> headers = new HttpHeaders();
+        HttpEntity<RasaChatbotProvider.RasaRequest> requestEntity = new HttpEntity<>(headers);
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance().uri(URI.create(messageUrl))
+                .queryParam("topic", topic)
+                .queryParam("conversation", conversationId)
+                .queryParam("start", first)
+                .queryParam("count", count);
+        ResponseEntity<ListResponse<Message>> response = restTemplate.exchange(uriBuilder.toUriString(), HttpMethod.GET, requestEntity, new ParameterizedTypeReference<ListResponse<Message>>() {
+        });
+        return response.getBody().getItems();
+    }
+
+    @Override
     public List<Conversation> getConversations(Long id, String participant) {
-        RestTemplate restTemplate = new RestTemplate();
         MultiValueMap<String, String> headers = new HttpHeaders();
         HttpEntity<RasaChatbotProvider.RasaRequest> requestEntity = new HttpEntity<>(headers);
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance().uri(URI.create(conversationUrl));
@@ -64,5 +79,15 @@ public class DBMessagingProvider implements MessagingProvider {
         ResponseEntity<ListResponse<Conversation>> response = restTemplate.exchange(uriBuilder.toUriString(), HttpMethod.GET, requestEntity, new ParameterizedTypeReference<ListResponse<Conversation>>() {
         });
         return response.getBody().getItems();
+    }
+
+    @Override
+    public Conversation createConversation() {
+        MultiValueMap<String, String> headers = new HttpHeaders();
+        HttpEntity<RasaChatbotProvider.RasaRequest> requestEntity = new HttpEntity<>(headers);
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.newInstance().uri(URI.create(conversationUrl));
+        ResponseEntity<ItemResponse<Conversation>> response = restTemplate.exchange(uriBuilder.toUriString(), HttpMethod.POST, requestEntity, new ParameterizedTypeReference<ItemResponse<Conversation>>() {
+        });
+        return response.getBody().getItem();
     }
 }
