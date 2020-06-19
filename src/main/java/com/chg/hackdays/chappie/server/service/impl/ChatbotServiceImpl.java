@@ -48,8 +48,8 @@ public class ChatbotServiceImpl implements ChatbotService {
     public void listen(GenericMessage<Message> genericMessage, @Payload Message message) {
         try {
             message.setId(new MessageId(message.getTopic(), (Long) genericMessage.getHeaders().get("kafka_offset")));
-            boolean isFromChatBot = message.getSource() != null && message.getSource().toLowerCase().contains(USER_CHAPPIE.toLowerCase());
-            boolean isToChatBot = message.getTarget() == null || message.getTarget().toLowerCase().contains(USER_CHAPPIE.toLowerCase());
+            boolean isFromChatBot = message.getSource() != null && message.getSource().toLowerCase().startsWith(USER_CHAPPIE.toLowerCase());
+            boolean isToChatBot = message.getTarget() == null || message.getTarget().toLowerCase().startsWith(USER_CHAPPIE.toLowerCase());
             boolean skip = StringUtil.isTruthy(message.getAttributes().getOrDefault(ATTR_SKIP, null));
             if (!isFromChatBot && isToChatBot && !skip) {
                 processMessages(Collections.singleton(message));
