@@ -14,7 +14,7 @@ spring:
     jdbc:
       initialize-schema: always
   datasource:
-    url: jdbc:postgresql://10.0.1.1:5432/chappie
+    url: ${DATASOURCE:jdbc:postgresql://10.0.1.1:5432/chappie}
     username: chappie
     password: chappie
   jpa:
@@ -23,7 +23,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 kafka:
-  bootstrapAddress: k1.local:9092,k2.local:9092,k3.local:9092
+  bootstrapAddress: ${KAFKA_HOSTS:k1.local:9092,k2.local:9092,k3.local:9092}
   groupId: chappie
   defaultTopic: chat
 chatbot:
