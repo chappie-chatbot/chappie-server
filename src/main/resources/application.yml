@@ -32,6 +32,10 @@ chatbot:
     url:
       base: ${RASA_HOST:http://localhost:5005}
       webhook: /webhooks/rest/webhook
+  keras:
+    url:
+      base: ${BOT_HOST:http://localhost:8082}
+      message: /message
 timeentry:
   url:
     base: ${TIMEENTRY_HOST:http://localhost:8089}

@@ -13,23 +13,21 @@ import org.springframework.stereotype.Repository;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Repository
-public class RasaChatbotProvider implements ChatbotProvider {
+public class KerasChatbotProvider implements ChatbotProvider {
     private static final String MESSAGE_TOPIC = "chat";
 
     private final Logger log = LoggerFactory.getLogger(getClass());
 
-    @Value("${chatbot.rasa.url.base}/${chatbot.rasa.url.webhook}")
-    String webhookUrl;
+    @Value("${chatbot.keras.url.base}/${chatbot.keras.url.message}")
+    String postMessageUrl;
     @Value("chappie:${chatbot.id}")
     private String messageSource;
 
@@ -49,33 +47,37 @@ public class RasaChatbotProvider implements ChatbotProvider {
 
     private List<Message> exchange(Message requestMessage) {
         RestTemplate restTemplate = new RestTemplate();
-        RasaRequest request = mapRasaRequest(requestMessage);
+        MessageRequest request = mapMessageRequest(requestMessage);
         MultiValueMap<String, String> headers = new HttpHeaders();
-        HttpEntity<RasaRequest> requestEntity = new HttpEntity<>(request, headers);
-        ResponseEntity<RasaResponse[]> response = restTemplate.exchange(webhookUrl, HttpMethod.POST, requestEntity, RasaResponse[].class);
-        return mapRasaResponse(requestMessage, Arrays.asList(response.getBody()));
+        HttpEntity<MessageRequest> requestEntity = new HttpEntity<>(request, headers);
+        ResponseEntity<MessageResponse> response = restTemplate.exchange(postMessageUrl, HttpMethod.POST, requestEntity, MessageResponse.class);
+        return Collections.singletonList(mapMessageResponse(requestMessage, response.getBody()));
     }
 
-    private List<Message> mapRasaResponse(Message request, List<RasaResponse> response) {
-        return response.stream().map(resp -> mapRasaResponse(request, resp)).collect(Collectors.toList());
+    private MessageRequest mapMessageRequest(Message message) {
+        MessageRequest result = new MessageRequest();
+        result.sender = message.getSource();
+        // TODO: Decode if necessary
+        result.message = message.getText();
+        return result;
     }
 
-    private Message mapRasaResponse(Message request, RasaResponse response) {
+    private Message mapMessageResponse(Message request, MessageResponse response) {
         Message result = new Message();
 
         StringBuilder textBuilder = new StringBuilder();
         Pattern attrPattern = Pattern.compile("\\[[^\\]]*\\]");
-        Matcher attrMatcher = attrPattern.matcher(response.getText());
+        Matcher attrMatcher = attrPattern.matcher(response.getResponse());
         int nextCh = 0;
         while (attrMatcher.find()) {
             String group = attrMatcher.group();
             String attrFullStr = group.substring(1, group.length() - 1);
             String[] attrParts = attrFullStr.split(":", 2);
             result.getAttributes().put(attrParts[0], attrParts[1]);
-            textBuilder.append(response.getText().substring(nextCh, attrMatcher.start()));
+            textBuilder.append(response.getResponse().substring(nextCh, attrMatcher.start()));
             nextCh = attrMatcher.end();
         }
-        textBuilder.append(response.getText().substring(nextCh));
+        textBuilder.append(response.getResponse().substring(nextCh));
 
         result.setTopic(MESSAGE_TOPIC);
         result.setSource(messageSource);
@@ -87,15 +89,7 @@ public class RasaChatbotProvider implements ChatbotProvider {
         return result;
     }
 
-    private RasaRequest mapRasaRequest(Message message) {
-        RasaRequest result = new RasaRequest();
-        result.sender = message.getSource();
-        // TODO: Decode if necessary
-        result.message = message.getText();
-        return result;
-    }
-
-    public static class RasaRequest {
+    public static class MessageRequest {
         String sender;
         String message;
 
@@ -116,33 +110,33 @@ public class RasaChatbotProvider implements ChatbotProvider {
         }
     }
 
-    public static class RasaResponse {
-        String recipient_id;
-        String text;
-        String image;
+    public static class MessageResponse {
+        String intent;
+        String probability;
+        String response;
 
-        public String getRecipient_id() {
-            return recipient_id;
+        public String getIntent() {
+            return intent;
         }
 
-        public void setRecipient_id(String recipient_id) {
-            this.recipient_id = recipient_id;
+        public void setIntent(String intent) {
+            this.intent = intent;
         }
 
-        public String getText() {
-            return text;
+        public String getProbability() {
+            return probability;
         }
 
-        public void setText(String text) {
-            this.text = text;
+        public void setProbability(String probability) {
+            this.probability = probability;
         }
 
-        public String getImage() {
-            return image;
+        public String getResponse() {
+            return response;
         }
 
-        public void setImage(String image) {
-            this.image = image;
+        public void setResponse(String response) {
+            this.response = response;
         }
     }
 }

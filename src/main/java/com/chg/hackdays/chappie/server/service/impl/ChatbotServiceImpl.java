@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ChatbotServiceImpl implements ChatbotService {
@@ -30,7 +31,7 @@ public class ChatbotServiceImpl implements ChatbotService {
     @Autowired
     MessageService messageService;
     @Autowired
-    ChatbotProvider chatbotProvider;
+    List<ChatbotProvider> chatbotProviders;
 
     @Override
     public List<Message> exchange(List<Message> messages) {
@@ -60,7 +61,10 @@ public class ChatbotServiceImpl implements ChatbotService {
     }
 
     private List<Message> processMessages(Collection<Message> messages) {
-        List<Message> replies = chatbotProvider.exchange(messages);
+        List<Message> replies = chatbotProviders.stream()
+                .parallel()
+                .flatMap(provider -> provider.exchange(messages).stream())
+                .collect(Collectors.toList());
         for (Message reply : replies) {
             if (reply.getSource() == null) {
                 reply.setSource(USER_CHAPPIE);
